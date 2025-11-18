@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Mostragem</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+        }
+
+        input[type="text"] {
+            padding: 6px;
+            width: 220px;
+        }
+
+        button {
+            padding: 6px 12px;
+            margin-left: 4px;
+            cursor: pointer;
+        }
+
+        .btn-voltar {
+            background-color: #f2f2f2;
+            border: 1px solid #ccc;
+        }
+
+        .btn-voltar:hover {
+            background-color: #ddd;
+        }
+
+        .quadro-salarios {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 16px;
+            width: 280px;
+            margin: 20px auto;
+            text-align: center;
+            background-color: #f9f9f9;
+            box-shadow: 0px 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .quadro-salarios h3 {
+            margin: 0;
+            font-size: 1.1em;
+            color: #555;
+        }
+
+        .valor-central {
+            font-size: 2em;
+            font-weight: bold;
+            color: #2a4d9b;
+            margin: 10px 0;
+        }
+
+        .valores-laterais {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.95em;
+            color: #333;
+        }
+
+        .quadros-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+        }
+    </style>
+</head>
+<body onload="carregarFuncoes()">
+    <form action="{{ url_for('pesquisa') }}" class="btn-voltar">
+        <button>Voltar</button>
+    </form>
+
+    <hr>
+
+    <div id="quadrosContainer" class="quadros-container" style="display:none;"></div>
+
+    <div>
+        <canvas id="meuGrafico" width="400" height="200"></canvas>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        const usuarios = JSON.parse(`{{ usuarios | tojson | safe }}`);
+        const btnVoltar = document.getElementById('btnVoltar');
+        const quadrosContainer = document.getElementById('quadrosContainer');
+
+        function carregarFuncoes() {
+            const listaUsuarios = Object.values(usuarios);
+            atualizarGrafico(listaUsuarios);
+            atualizarQuadros(listaUsuarios);
+        };
+
+        function voltar() {
+            campoBusca.value = '';
+            quadrosContainer.style.display = 'none';
+
+            if (grafico) {
+                grafico.destroy();
+            }
+        }
+
+        function atualizarQuadros(dados) {
+            const grupos = {};
+            dados.forEach(d => {
+                if (!grupos[d.nome]) grupos[d.nome] = [];
+                grupos[d.nome].push(d.salario);
+            });
+
+            quadrosContainer.innerHTML = '';
+
+            Object.keys(grupos).forEach(nome => {
+                const salarios = grupos[nome];
+                const media = (salarios.reduce((a, b) => a + b, 0) / salarios.length).toFixed(1);
+                const min = Math.min(...salarios);
+                const max = Math.max(...salarios);
+
+                const quadro = document.createElement('div');
+                quadro.classList.add('quadro-salarios');
+                quadro.innerHTML = `
+                    <h3>${nome}</h3>
+                    <div class="valor-central">R$: ${media}</div>
+                    <div class="valores-laterais">
+                        <span>Menor: </span>
+                        <span>Media: </span>
+                        <span>Maior: </span>
+                    </div>
+                    <div class="valores-laterais">
+                        <span><strong>R$: ${min}</strong></span>
+                        <span><strong>R$: ${media}</strong></span>
+                        <span><strong>R$: ${max}</strong></span>
+                    </div>
+                `;
+                quadrosContainer.appendChild(quadro);
+            });
+
+            quadrosContainer.style.display = 'flex';
+        }
+
+        let grafico;
+        function atualizarGrafico(dados){
+            const ctx = document.getElementById('meuGrafico').getContext('2d');
+
+            const nomes = dados.map(d => d.nome);
+            const salarios = dados.map(d => d.salario);
+
+            if (grafico) {
+                grafico.destroy();
+            }
+
+            grafico = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: nomes,
+                    datasets: [{
+                        label: 'salarios dos usuários filtrados',
+                        data: salarios,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        btnVoltar.addEventListener('click', voltar);
+    </script>
+</body>
+</html>

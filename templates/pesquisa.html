@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista de Usuários</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 8px;
+            border: 1px solid #ccc;
+            text-align: left;
+        }
+
+        .tabela-container {
+            max-height: 250px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            margin-top: 10px;
+        }
+
+        input[type="text"] {
+            padding: 6px;
+            width: 220px;
+        }
+
+        button {
+            padding: 6px 12px;
+            margin-left: 4px;
+            cursor: pointer;
+        }
+
+        .btn-limpar {
+            background-color: #f2f2f2;
+            border: 1px solid #ccc;
+        }
+
+        .btn-limpar:hover {
+            background-color: #ddd;
+        }
+
+        tr.hidden {
+            display: none;
+        }
+
+        .no-results {
+            color: #666;
+            text-align: center;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .botao-container {
+            display: flex;
+            gap: 10px; 
+        }
+    </style>
+</head>
+<body>
+    <h2>Bem-vindo, {{ user }}!</h2>
+    <p>Login realizado com sucesso!</p>
+
+    {% if error %}
+        <p style="color:red;">{{ error }}</p>
+    {% endif %}
+
+    <form action="{{ url_for('logout') }}" method="get">
+        <button type="submit">Logout</button>
+    </form>
+
+    <hr>
+
+    <div class="botao-container">
+        <form action="{{ url_for('mostragem') }}">
+            <input id="campoBusca" name="busca" placeholder="Pesquisar usuário..." value="{{ request.args.get('busca', '') }}">
+            <button class="btn-limpar" type="submit">Buscar</button>
+        </form>
+            <button id="btnLimpar" class="btn-limpar">Limpar</button>
+    </div>
+    
+    
+
+    <h1>Lista de Cargos</h1>
+    <div class="tabela-container">
+        <table id="tabelaUsuarios">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Posição</th>
+                    <th>Salário</th>
+                    <th>Área</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cargo in usuarios %}
+                <tr>
+                    <td>{{ cargo.id }}</td>
+                    <td>{{ cargo.nome }}</td>
+                    <td>{{ cargo.salario }}</td>
+                    <td>{{ cargo.area }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <p class="no-results" id="noResults">Nenhum usuário encontrado.</p>
+
+    <script>
+        const campoBusca = document.getElementById('campoBusca');
+        const btnLimpar = document.getElementById('btnLimpar');
+        const linhas = document.querySelectorAll('#tabelaUsuarios tbody tr');
+        const noResults = document.getElementById('noResults');
+
+        function filtrarTabela() {
+            const termo = campoBusca.value.toLowerCase().trim();
+            let encontrou = false;
+
+            linhas.forEach(linha => {
+                const texto = linha.textContent.toLowerCase();
+                if (texto.includes(termo)) {
+                    linha.classList.remove('hidden');
+                    encontrou = true;
+                } else {
+                    linha.classList.add('hidden');
+                }
+            });
+            noResults.style.display = encontrou ? 'none' : 'block';
+        }
+
+        function limparTabela() {
+            campoBusca.value = '';
+            linhas.forEach(linha => linha.classList.remove('hidden'));
+            noResults.style.display = 'none';
+        }
+ 
+        campoBusca.addEventListener('keyup', filtrarTabela);
+        btnLimpar.addEventListener('click', limparTabela);
+    </script>
+</body>
+</html>
