@@ -84,14 +84,14 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
-        const usuarios = JSON.parse(`{{ usuarios | tojson | safe }}`);
+        const cargos = JSON.parse(`{{ cargos | tojson | safe }}`);
         const btnVoltar = document.getElementById('btnVoltar');
         const quadrosContainer = document.getElementById('quadrosContainer');
 
         function carregarFuncoes() {
-            const listaUsuarios = Object.values(usuarios);
-            atualizarGrafico(listaUsuarios);
-            atualizarQuadros(listaUsuarios);
+            const listaCargos = Object.values(cargos);
+            atualizarGrafico(listaCargos);
+            atualizarQuadros(listaCargos);
         };
 
         function voltar() {

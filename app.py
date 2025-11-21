@@ -89,7 +89,7 @@ def logout():
 @app.route("/pesquisa")
 @login_required
 def pesquisa():
-    return render_template("pesquisa.html", user=current_user.username, usuarios = Cargos.query.all())
+    return render_template("pesquisa.html", cargos = Cargos.query.all())
 
 @app.route("/mostragem")
 @login_required
@@ -102,8 +102,8 @@ def mostragem():
         ).all()
         if filtrados:
             filtradosDic = [cargoParaDic(cargo) for cargo in filtrados]
-            return render_template("mostragem.html", usuarios = filtradosDic)
-    return render_template("pesquisa.html", user=current_user.username, usuarios = Cargos.query.all(), error="Nenhum resultado encontrado")
+            return render_template("mostragem.html", cargos = filtradosDic)
+    return render_template("pesquisa.html", cargos = Cargos.query.all(), error="Nenhum resultado encontrado")
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
