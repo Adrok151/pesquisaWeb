@@ -1,11 +1,14 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from models import db, User, Cargos
+import os
+from dotenv import load_dotenv
 
+load_dotenv()
 
 app = Flask(__name__)
-app.config["SECRET_KEY"] = "chave_muito_secreta_aqui"
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///meubanco.db"
+app.config["SECRET_KEY"] = os.environ.get('CHAVE_SECRETA')
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get('DATABASE_URL')
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db.init_app(app)
